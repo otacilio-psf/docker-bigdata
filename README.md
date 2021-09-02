@@ -16,7 +16,6 @@ Ambiente para estudo dos principais frameworks big data em docker.
         ex: /home/user/docker
 
 #### Em um terminal/DOS, dentro diretório docker, realizar o clone do projeto no github
-          <s>git clone https://github.com/rodrigo-reboucas/docker-bigdata.git</s>
           git clone https://github.com/otacilio-psf/docker-bigdata.git
           
 ## INICIANDO O AMBIENTE
