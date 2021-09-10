@@ -1,0 +1,1 @@
+load data inpath '/user/aluno/otacilio/data/população/populacaoLA.csv' into table pop

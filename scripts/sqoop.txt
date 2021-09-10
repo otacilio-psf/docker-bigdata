@@ -1,0 +1,117 @@
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+
+sqoop list-databases --connect jdbc:mysql://database --username root --password secret
+
+sqoop list-tables --connect jdbc:mysql://database/sakila --username root --password secret
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "SELECT * FROM employees LIMIT 15"
+
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "insert into departments values('d010', 'BI')"
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "SELECT * FROM departments"
+
+sqoop eval $conn \
+--query "SELECT * FROM departments"
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "create table benefits(cod int(2)  AUTO_INCREMENT PRIMARY KEY, name varchar(30))"
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "insert into benefits values(null,'food vale')"
+
+
+sqoop import --table employees \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--target-dir /user/hive/warehouse/db_test_a
+
+sqoop import --table employees \
+--connect jdbc:mysql://database/employees --username root --password secret \
+--columns "first_name,last_name" \
+--fields-terminated-by '\t' \
+--target-dir /user/hive/warehouse/db_test_c
+
+
+sqoop import --table employees \
+--connect jdbc:mysql://database/employees --username root --password secret \
+--columns "first_name,last_name" \
+--fields-terminated-by ':' \
+--target-dir /user/hive/warehouse/db_test_c -delete-target-dir
+
+mysql>
+CREATE TABLE  cp_titles_date AS SELECT title, to_date FROM titles;
+
+sqoop import -m 8 --table titles \
+--connect jdbc:mysql://database/employees --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test_5 \
+--as-parquetfile \
+--compress --compression-codec org.apache.hadoop.io.compress.SnappyCodec
+
+sqoop import -m 4 --table cp_titles_date \
+--connect jdbc:mysql://database/employees --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test_6_date \
+--split-by to_date
+
+sqoop import -m 1 --table cp_rental_append \
+--connect jdbc:mysql://database/sakila --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test3
+
+sqoop import -m 1 --table cp_rental_append \
+--connect jdbc:mysql://database/sakila --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test3 --append
+
+sqoop import -m 1 --table cp_rental_id \
+--connect jdbc:mysql://database/sakila --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test3 \
+--incremental append --check-column rental_id --last-value 16049
+
+sqoop import -m 1 --table cp_rental_date \
+--connect jdbc:mysql://database/sakila --username root --password secret \
+--warehouse-dir /user/hive/warehouse/db_test3 \
+--incremental lastmodified --merge-key rental_id --check-column rental_date --last-value '2006-02-14 15:16:03'
+
+
+
+--warehouse-dir /user/hive/warehouse/otacilio.db \
+
+sqoop import -m 1 --table titles \
+--connect jdbc:mysql://database/employees --username root --password secret \
+--warehouse-dir /user/hive/warehouse/otacilio.db \
+--hive-import \
+--create-hive-table \
+--hive-table otacilio.titles
+
+If I define the hive-table I didn't need to set the target dir
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "TRUNCATE TABLE titles"
+
+sqoop eval \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--query "SELECT * FROM titles LIMIT 10"
+
+sqoop export \
+--connect jdbc:mysql://database/employees \
+--username root --password secret \
+--export-dir /user/hive/warehouse/otacilio.db/titles \
+--update-mode allowinsert \
+--table titles \
+--fields-terminated-by '\001'
